@@ -51,8 +51,9 @@ jobs:
           tags: ${{ secrets.DOCKER_ORG }}/transcriptomicsapp:${{ secrets.DOCKER_TAG }}
           build-args: |
             BASE_IMAGE=${{ env.BASE_IMAGE }}
-            GITHUB_PAT=${{ secrets.PAT_GITHUB }}
             DOCKER_BUILDKIT=1
+          secrets: |
+            github_pat=${{ secrets.PAT_GITHUB }}
           ##The registry cache backend is the inline cache++. This backend pushes cache artifacts as a separate image than the Docker image to a dedicated location in the registry.
           ##Contrary to the inline cache, the registry cache supports caching of intermediate layers in a multi-stage Docker build when configured with mode=max . This increases the chances of cache hits on subsequent builds.
           ##It also supports a host of options to control compression type, levels, and naming of the cache image etc. At the cost of some additional complexity to set up, this is the best-in-class caching solution for Docker builds.
