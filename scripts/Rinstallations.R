@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #setwd('/opt/renv_transcriptomics/renv')
 
 #Sys.setenv(RENV_PATHS_CACHE = '/opt/renv_transcriptomics/renv/cache')

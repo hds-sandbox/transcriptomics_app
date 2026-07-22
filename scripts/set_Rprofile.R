@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 options(renv.verbose = FALSE)
 options(renv.config.synchronized.check = FALSE)
 renv::load('/opt/renv_transcriptomics/')

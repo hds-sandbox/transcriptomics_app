@@ -2,6 +2,8 @@
 
 CIRRO_FOLDER=/usr/Cirrocumulus/Data/pbmc3k
 PORT_USER=8787
+CURR_DIR=/work
+JUPYTER_KERNELS=$PIXI_ENV/share/jupyter/kernels/
 
 ## Options for the Transcriptomics Sandbox app
 while getopts c:f:p: option; do
@@ -16,6 +18,46 @@ while getopts c:f:p: option; do
     esac
 done
 
+#########################
+##### General setup #####
+#########################
+
+configure_rstudio() {
+    # set desired port and rstudio configuration 
+    local port="${RSTUDIO_PORT:-$PORT_USER}"
+    local config="/etc/rstudio/rserver.conf"
+
+    sudo sed -i \
+        -e '/^www-port=/d' \
+        -e '/^rsession-which-r=/d' \
+        -e '/^rsession-ld-library-path=/d' \
+        "$config"
+
+    sudo tee -a "$config" >/dev/null <<EOF
+www-port=$port
+rsession-which-r=$PIXI_ENV/bin/R
+rsession-ld-library-path=$PIXI_ENV/lib:$PIXI_ENV/lib/R/lib
+EOF
+}
+
+start_jupyter() {
+    exec env SHELL="$PIXI_ENV/bin/bash" \
+        pixi run --manifest-path "$PIXI_PROJECT/pixi.toml" \
+        jupyter-lab \
+        --allow-root \
+        --no-browser \
+        --port="$PORT_USER" \
+        --ip=0.0.0.0 \
+        --IdentityProvider.token='' \
+        --ResourceUseDisplay.track_cpu_percent=True \
+        --ResourceUseDisplay.track_disk_usage=True \
+        --ResourceUseDisplay.enable_prometheus_metrics=False \
+        --ContentsManager.allow_hidden=True \
+        --ServerApp.terminals_enabled=True \
+        --ServerApp.terminado_settings shell_command=/bin/bash \
+        --ServerApp.root_dir="$CURR_DIR"
+}
+
 printf "\n======================  "
 printf "\n== Selecting Module == \n"
 printf "======================  \n\n"
@@ -28,13 +70,8 @@ if [ "${COURSE}" == "RNAseq_in_Rstudio" ]; then
     printf "\n== Start RStudio ==  \n"
     printf "=================== \n\n"
 
-    #!/bin/bash
-
-    # Set the desired port
-    PORT=${RSTUDIO_PORT:-$PORT_USER}
-    # Update the RStudio Server configuration
-    sudo echo "www-port=$PORT" >> /etc/rstudio/rserver.conf
-    sudo /init 
+    configure_rstudio
+    exec sudo /init
 
 # Cirrocumulus scRNA visualizer
 elif [ "${COURSE}" == "Cirrocumulus" ]; then
@@ -45,67 +82,56 @@ elif [ "${COURSE}" == "Cirrocumulus" ]; then
     printf "\n== Start Cirrocumulus ==  \n"
     printf "======================== \n\n"
 
-    cd "${CIRRO_FOLDER}"
-
-    eval "$(/opt/miniconda/bin/conda shell.bash hook)" 
-    conda activate /opt/miniconda/envs/RNAseq_env
-    cirro launch --host 0.0.0.0 --port $PORT_USER ./*.h5ad
+    cd "${CIRRO_FOLDER}" || exit
+    
+    exec env SHELL="$PIXI_ENV/bin/bash" pixi run --manifest-path "$PIXI_PROJECT/pixi.toml" \
+        cirro launch --host 0.0.0.0 --port $PORT_USER ./*.h5ad
 
 # Intro to bulk RNAseq with Rstudio
 elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
     echo "-----> Chosen course: Introduction to bulk RNAseq analysis in R"
 
     if [ ! -d "Notebooks" ]; then
-        eval "$(/opt/miniconda/bin/conda shell.bash hook)" 
-        conda activate /opt/miniconda/envs/RNAseq_env 
 
         echo "-----> Downloading fresh course material."
         #Clone the repo and move the notebooks, then remove
         git clone --depth 1 https://github.com/hds-sandbox/bulk_RNAseq_course.git /tmp/course
+        cd $CURR_DIR || exit
         mv /tmp/course/Notebooks  .
         mkdir -p Scripts
         mv /tmp/course/Scripts/ucloud_preprocessing_setup Scripts/
         rm -rf /tmp/course
         #Download only data and unzip
-        zenodo_get 10.5281/zenodo.7116370 -w test.txt
-        wget `grep Data test.txt`
-        unzip Data.zip; rm Data.zip
+        "$PIXI_ENV/bin/zenodo_get" 10.5281/zenodo.7116370 -w /tmp/zenodo_urls.txt
+        wget -O Data.zip "$(grep '/Data.zip' /tmp/zenodo_urls.txt)"
+        unzip Data.zip
+        rm -f Data.zip /tmp/zenodo_urls.txt
+
         #make the results folder
         mkdir -p Results
-
-        conda deactivate
 
     else
         echo "-----> Using your own course material."
 
     fi
 
-    #bashrc file for conda
-    echo 'eval "$(/opt/miniconda/bin/conda shell.bash hook)"'>>/home/ucloud/.bashrc   
-    echo 'conda activate /opt/miniconda/envs/RNAseq_env'>>/home/ucloud/.bashrc
-
-    # Set the desired port
-    PORT=${RSTUDIO_PORT:-$PORT_USER}
-    # Update the RStudio Server configuration
-    sudo echo "www-port=$PORT" >> /etc/rstudio/rserver.conf
-    sudo /init 
+    configure_rstudio
+    exec sudo /init
 
 # Intro to spatial transcriptomics with scVerse
 elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
     echo "-----> Chosen course: introduction to spatial transcriptomics"
-    eval "$(/opt/miniconda/bin/conda shell.bash hook)" 
-    conda activate /opt/miniconda/envs/RNAseq_env 
 
     if [ ! -d "Notebooks" ]; then
 
         echo "-----> Downloading fresh course material."
         #Clone the repo and move the notebooks, then remove
-        git clone -b hds-sandbox-main --depth 1 https://github.com/hds-sandbox/workshop_intro_spatial_scverse.git /tmp/course
-        mv /tmp/course/notebooks  ./Notebooks
-        mkdir -p Resources Sandbox
-        mv /tmp/course/resources Resources/
-        mv /tmp/course/sandbox Sandbox/
-        mv /tmp/course/download.py test_notebook.sh .
+        git clone -b hds-sandbox-main --depth 1 https://github.com/hds-sandbox/intro-spatial-scverse_workshop.git /tmp/course
+        cd $CURR_DIR || exit
+        mv /tmp/course/notebooks  ./notebooks
+        mv /tmp/course/resources resources/
+        mv /tmp/course/sandbox sandbox/
+        mv /tmp/course/download.py /tmp/course/test_notebooks.sh .
         rm -rf /tmp/course
 
     else
@@ -113,15 +139,13 @@ elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
 
     fi
     
-    #bashrc file for conda
-    echo 'eval "$(/opt/miniconda/bin/conda shell.bash hook)"'>>/home/ucloud/.bashrc   
-    echo 'conda activate /opt/miniconda/envs/RNAseq_env'>>/home/ucloud/.bashrc
-
+    cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    eval "$(/opt/miniconda/bin/conda shell.bash hook)" 
-    conda activate /opt/miniconda/envs/RNAseq_env 
-    /opt/miniconda/envs/RNAseq_env/bin/R -e "IRkernel::installspec(user=TRUE, name = 'r_scrna', displayname = 'R analysis')"
-    SHELL=/bin/bash jupyter-lab --port=$PORT_USER --ip=0.0.0.0 --NotebookApp.token='' --no-browser
+    pixi run \
+    --manifest-path $PIXI_PROJECT/pixi.toml \
+    Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
+
+    start_jupyter
 
 
 # Intro to scRNAseq with Rstudio
@@ -130,41 +154,32 @@ elif [ "${COURSE}" == "Intro_scRNAseq_R" ]; then
 
     if [ ! -d "Notebooks" ]; then
 
-        eval "$(/opt/miniconda/bin/conda shell.bash hook)" 
-        conda activate /opt/miniconda/envs/RNAseq_env 
-
         echo "-----> Downloading fresh course material."
         #Clone the repo and move the notebooks, then remove
         git clone --depth 1 https://github.com/hds-sandbox/scRNASeq_course.git /tmp/course
+        cd $CURR_DIR || exit
         mv /tmp/course/Notebooks .
         rm -rf /tmp/course
         #Download only data and unzip
-        zenodo_get 10.5281/zenodo.7827898 -w test.txt
-        wget `grep Data test.txt`
-        unzip Data.zip; rm Data.zip
+        "$PIXI_ENV/bin/zenodo_get" 10.5281/zenodo.7116370 -w /tmp/zenodo_urls.txt
+        wget -O Data.zip "$(grep '/Data.zip' /tmp/zenodo_urls.txt)"
+        unzip Data.zip
+        rm Data.zip /tmp/zenodo_urls.txt
         #make the results folder
         mkdir -p Results
-
-        conda deactivate
 
     else
         echo "-----> Using your own course material."
 
     fi
     
-    #bashrc file for conda
-    echo 'eval "$(/opt/miniconda/bin/conda shell.bash hook)"'>>/home/ucloud/.bashrc   
-    conda 'activate /opt/miniconda/envs/RNAseq_env'>>/home/ucloud/.bashrc
     #start a session of rstudio server
     printf "\n===================  "
     printf "\n== Start RStudio ==  \n"
     printf "=================== \n\n"
 
-    # Set the desired port
-    PORT=${RSTUDIO_PORT:-$PORT_USER}
-    # Update the RStudio Server configuration
-    sudo echo "www-port=$PORT" >> /etc/rstudio/rserver.conf
-    sudo /init 
+    configure_rstudio
+    exec sudo /init
 
 #RNAsequencing development on jupyterlab
 elif [ "${COURSE}" == "RNAseq_CLI" ]; then
@@ -175,11 +190,12 @@ elif [ "${COURSE}" == "RNAseq_CLI" ]; then
     printf "\n== Start RNAseq CLI ==  \n"
     printf "======================== \n\n"
 
-    rm /home/$USER/.Rprofile
-    eval "$(/opt/miniconda/bin/conda shell.bash hook)" 
-    conda activate /opt/miniconda/envs/RNAseq_env 
-    /opt/miniconda/envs/RNAseq_env/bin/R -e "IRkernel::installspec(user=TRUE, name = 'r_scrna', displayname = 'R analysis')"
-    SHELL=/bin/bash jupyter-lab --port=$PORT_USER --ip=0.0.0.0 --NotebookApp.token='' --no-browser
+    cd "$CURR_DIR" || exit
+    #start a session of jupyterlab
+    pixi run \
+    --manifest-path $PIXI_PROJECT/pixi.toml \
+    Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
+    start_jupyter
 
 
 #Advanced single cell transcriptomics
@@ -195,13 +211,11 @@ elif [ "${COURSE}" == "Advanced_SingleCell" ]; then
     printf "\n===== Start Module =====  \n"
     printf "========================== \n\n"
 
-    #bashrc file for conda
-    echo 'eval "$(/opt/miniconda/bin/conda shell.bash hook)"'>>/home/ucloud/.bashrc   
-    echo 'conda activate /opt/miniconda/envs/RNAseq_env'>>/home/ucloud/.bashrc
+    cd "$CURR_DIR" || exit
+    #start a session of jupyterlab
+    pixi run \
+    --manifest-path $PIXI_PROJECT/pixi.toml \
+    Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R Adv. Single Cell")'
+    start_jupyter
 
-    eval "$(/opt/miniconda/bin/conda shell.bash hook)" 
-    conda activate /opt/miniconda/envs/RNAseq_env 
-    echo ".libPaths(c(\"/opt/miniconda/envs/RNAseq_env/lib/R/library/\"))" > /home/ucloud/.Rprofile
-    /opt/miniconda/envs/RNAseq_env/bin/R -e "IRkernel::installspec(user=TRUE, name = 'r_scrna', displayname = 'R Adv Single Cell')"
-    SHELL=/bin/bash jupyter-lab --port=$PORT_USER --ip=0.0.0.0 --NotebookApp.token='' --no-browser
 fi
