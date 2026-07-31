@@ -2,8 +2,11 @@ name: default
 channels:
     - conda-forge
     - bioconda
+    - r
+    - anaconda
     - nodefaults
     - pwwang
+    - nclibz  #for r-ggforestplot
 dependencies:
     - python<3.12
     - pip
@@ -37,6 +40,8 @@ dependencies:
     - bioconductor-org.hs.eg.db
     - bioconductor-org.mm.eg.db
     - bioconductor-org.dm.eg.db
+    - bioconductor-genomicranges
+    - bioconductor-ucell
     - bowtie2
     - eggnog-mapper
     - fastp
@@ -65,6 +70,7 @@ dependencies:
     - r-clustersim
     - r-cowplot
     - r-dofuture
+    - r-enrichr
     - r-factoextra
     - r-factominer
     - r-fossil
@@ -74,12 +80,14 @@ dependencies:
     - r-ggpubr
     - r-ggrepel
     - r-ggplot2
+    - r-ggraph
     - r-ggsci
     - r-globals>=0.16.1
     - r-parallelly>=1.34.0
     - r-gprofiler2
     - r-harmony>=1.0.1
     - r-hexbin
+    - r-hdf5r
     - r-httr
     - r-igraph
     - r-irlba
@@ -95,9 +103,10 @@ dependencies:
     - r-remotes
     - r-reticulate>=1.35
     - r-rfast
-    - r-sceasy
     - r-sctransform
     - r-seurat
+    - r-seurat-data
+    - r-seurat-disk
     - r-seuratwrappers
     - r-signac
     - r-statmod
@@ -126,6 +135,21 @@ dependencies:
     - ipywidgets
     - jupyter_contrib_nbextensions # for auto-completion 
     - jupyter_app_launcher # personalized items in launcher
+    - jupyter-resource-usage
+    - jupyterlab-topbar-text
+    - autopep8
+    - isort
+    - yapf
+    - black
+    - jupyterlab-git
+    - jupyterlab-lsp
+    - jupyter_bokeh
+    - jupyter-lsp
+    - jupyter-lsp-r
+    - jupyter-lsp-python
+    - jupyter-lsp-latex
+    - jupyter-lsp-python-plugins
+    - anaconda-toolbox
     - pytest
     - geopandas # for bento-tools
     - cellpose  # for bento-tools
@@ -139,3 +163,12 @@ dependencies:
     - r-magick
     - imagemagick
     - r-biocmanager
+    - pip
+    - pip:
+        - jupyterquiz
+        - lxml_html_clean # for napari
+        - PyQt5 # for napari
+        # spatial-image
+        - wget
+        - zenodo-get @ git+https://github.com/hds-sandbox/zenodo_get.git@patch-1
+        - cirrocumulus

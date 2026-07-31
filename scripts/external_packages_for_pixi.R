@@ -26,9 +26,9 @@ if (nzchar(token) && token != "None") {
     message("GITHUB_PAT is not set; continuing without authentication.") 
 }
 
-remotes::install_github(c("satijalab/seurat-data","mojaveazure/seurat-disk"),
-                    upgrade="never",
-                    quiet=TRUE)
+#remotes::install_github(c("satijalab/seurat-data","mojaveazure/seurat-disk"),
+#                    upgrade="never",
+#                    quiet=TRUE)
 
 remotes::install_github("NightingaleHealth/ggforestplot",
     upgrade="never", 
@@ -46,9 +46,13 @@ remotes::install_github("SamueleSoraggi/DoubletFinder",
     upgrade="never",
     quiet=TRUE )
 
-remotes::install_local('/tmp/hdWGCNA-69110d0.zip',
-                        upgrade="never",
-                        quiet=TRUE)
+remotes::install_github("smorabit/hdWGCNA", 
+    upgrade="never",
+    quiet=TRUE )
+
+#remotes::install_local('/tmp/hdWGCNA-69110d0.zip',
+#                        upgrade="never",
+#                        quiet=TRUE)
 
 #remotes::install_github('smorabit/hdWGCNA@69110d0aefdb0601a1215b232a83b29017a39dae', 
 #    ref='dev', 

@@ -14,7 +14,7 @@ ENV G_SLICE=always-malloc
 ENV PIXI_PROJECT=/opt/pixi/envs/course_env
 ENV PIXI_ENV=/opt/pixi/envs/course_env/.pixi/envs/default
 ENV SHELL=/bin/bash
-ENV R_HOME=
+#ENV R_HOME=
 ENV PATH=$PATH:/home/$USER/bin:/home/$USER/.pixi/bin
 
 ## Set shell
@@ -78,8 +78,7 @@ RUN curl -fsSL https://pixi.sh/install.sh | bash \
 WORKDIR $PIXI_PROJECT
 
 RUN pixi init --import /tmp/envs/environment.yml \
- && pixi install --run-post-link-scripts \
- && pixi run python -m pip install -r /tmp/envs/requirements_pixi.txt 
+ && pixi install --run-post-link-scripts 
 
 RUN --mount=type=secret,id=github_pat,env=GITHUB_PAT \
     pixi run --manifest-path /opt/pixi/envs/course_env/pixi.toml \
