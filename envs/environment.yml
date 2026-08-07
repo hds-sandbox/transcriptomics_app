@@ -149,7 +149,6 @@ dependencies:
     - jupyter-lsp-python
     - jupyter-lsp-latex
     - jupyter-lsp-python-plugins
-    - anaconda-toolbox
     - pytest
     - geopandas # for bento-tools
     - cellpose  # for bento-tools

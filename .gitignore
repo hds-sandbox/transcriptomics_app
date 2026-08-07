@@ -9,3 +9,4 @@ Docker.log
 build.log
 data_test
 .vscode
+*.log

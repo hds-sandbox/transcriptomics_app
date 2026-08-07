@@ -4,6 +4,7 @@ CIRRO_FOLDER=/usr/Cirrocumulus/Data/pbmc3k
 PORT_USER=8787
 CURR_DIR=/work
 JUPYTER_KERNELS=$PIXI_ENV/share/jupyter/kernels/
+export PATH="$PIXI_ENV/bin:$HOME/.pixi/bin:$PATH"
 
 ## Options for the Transcriptomics Sandbox app
 while getopts c:f:p: option; do
@@ -112,7 +113,8 @@ elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
 
     fi
 
-    start_jupyter
+    configure_rstudio
+    exec sudo /init
 
 # Intro to spatial transcriptomics with scVerse
 elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
@@ -137,7 +139,7 @@ elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
     
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
+    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
 
     start_jupyter
 
@@ -185,7 +187,7 @@ elif [ "${COURSE}" == "RNAseq_CLI" ]; then
 
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
+    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
     start_jupyter
 
 
@@ -204,7 +206,7 @@ elif [ "${COURSE}" == "Advanced_SingleCell" ]; then
 
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R Adv. Single Cell")'
+    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R Adv. Single Cell")'
     start_jupyter
 
 fi
