@@ -1,5 +1,5 @@
-ARG BASE_IMAGE=dreg.cloud.sdu.dk/ucloud-apps/rstudio:4.5.1
-FROM $BASE_IMAGE
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
@@ -11,11 +11,18 @@ LABEL software="Transcriptomics sandbox" \
 
 
 ENV G_SLICE=always-malloc
-ENV PIXI_PROJECT=/opt/pixi/envs/course_env
-ENV PIXI_ENV=/opt/pixi/envs/course_env/.pixi/envs/default
+ENV PIXI_PROJECT=/opt/
+ENV PIXI_ENV=${PIXI_PROJECT}/.pixi/envs/course-env
 ENV SHELL=/bin/bash
-#ENV R_HOME=
 ENV PATH=$PATH:/home/$USER/bin:/home/$USER/.pixi/bin
+ENV RESOURCE_SCHEMA="${PIXI_ENV}/share/jupyter/labextensions/@jupyter-server/resource-usage/schemas/@jupyter-server/resource-usage/topbar-item.json"
+ENV JUPYTER_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/common-files_development/refs/heads/main/jupyterlab_and_plugins.yaml"
+
+## Copy input files
+COPY --chown=$USERID:$GROUPID envs/environment.yml ${PIXI_PROJECT}/environment.yml
+COPY --chown=$USERID:$GROUPID scripts /tmp
+## cirrocumulus example data
+COPY --chown=$USERID:$GROUPID ./pbmc3k /usr/Cirrocumulus/Data/pbmc3k
 
 ## Set shell
 USER 0
@@ -45,13 +52,13 @@ RUN apt-get update \
     texlive-plain-generic \
     texlive-xetex xxd \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p \
     /opt/pixi \
     "/home/${USER}/.R" \
     /usr/Cirrocumulus/Data \
  && chown -R "${USERID}:${GROUPID}" \
+    /opt \
     /opt/pixi \
     "/home/${USER}/.R" \
     /usr/Cirrocumulus
@@ -65,39 +72,31 @@ RUN if [[ "${TINI_}" = "latest" ]]; then export TINI_=$(curl -s https://api.gith
 
 USER $USERID
 
-## Copy input files
-COPY --chown=$USERID:$GROUPID envs /tmp/envs
-COPY --chown=$USERID:$GROUPID scripts /tmp
-
 # Install Pixi and create the course environment
-WORKDIR /opt/pixi
+WORKDIR ${PIXI_PROJECT}
 
 RUN curl -fsSL https://pixi.sh/install.sh | bash \
- && mkdir -p "$PIXI_PROJECT"
-
-WORKDIR $PIXI_PROJECT
-
-RUN pixi init --import /tmp/envs/environment.yml \
- && pixi install --run-post-link-scripts 
+ && mkdir -p "${PIXI_PROJECT}" \
+ && curl -fsSL -o /opt/jupyterlab_and_plugins.yml "${JUPYTER_ENV_FILE}" \
+ && pixi init \
+ && pixi add conda-merge \
+ && pixi run conda-merge ./environment.yml ./jupyterlab_and_plugins.yml > ./environment_merged.yml \
+ && pixi import --environment course-env --format conda-env ./environment_merged.yml \
+ && rm -rf ./pixi/envs/default \
+ && cat ./environment_merged.yml
 
 RUN --mount=type=secret,id=github_pat,env=GITHUB_PAT \
-    pixi run --manifest-path /opt/pixi/envs/course_env/pixi.toml \
-    Rscript /tmp/external_packages_for_pixi.R
-
-# enable resource usage topbar
-RUN RESOURCE_SCHEMA="/opt/pixi/envs/course_env/.pixi/envs/default/share/jupyter/labextensions/@jupyter-server/resource-usage/schemas/@jupyter-server/resource-usage/topbar-item.json" && \
-    if [ -f "$RESOURCE_SCHEMA" ]; then \
-        sed -i 's/"default": false/"default": true/g' "$RESOURCE_SCHEMA"; \
-    fi
-    
-RUN cat >> "/home/${USER}/.bashrc" <<'EOF'
-export PIXI_PROJECT=/opt/pixi/envs/course_env
-export PIXI_ENV="$PIXI_PROJECT/.pixi/envs/default"
+ pixi install --environment course-env --run-post-link-scripts \
+ && pixi run --environment course-env \
+    Rscript /tmp/external_packages_for_pixi.R \
+ && if [ -f "$RESOURCE_SCHEMA" ]; then \
+      sed -i 's/"default": false/"default": true/g' "$RESOURCE_SCHEMA"; \
+    fi \
+ && cat >> "/home/${USER}/.bashrc" <<'EOF'
+export PIXI_PROJECT=${PIXI_PROJECT}
+export PIXI_ENV=${PIXI_ENV}
 export PATH="$PIXI_ENV/bin:$HOME/.pixi/bin:$PATH"
 EOF
-
-## cirrocumulus example data
-COPY --chown=$USERID:$GROUPID ./pbmc3k /usr/Cirrocumulus/Data/pbmc3k
 
 ## Set startup script in the PATH
 ## entrypoint script

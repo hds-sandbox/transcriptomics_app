@@ -10,8 +10,8 @@ while getopts c:f:p: option; do
     case "${option}" in
     c) COURSE=${OPTARG} ;;
     f) CIRRO_FOLDER=${OPTARG} ;; # only for Cirrocumulus choice of module
-    p) PORT_USER=${OPTARG} ;; # not needed on ucloud!!!
-    \?)                          ## Invalid option
+    p) PORT_USER=${OPTARG} ;; # to reuse sandbox on genomeDK and local machine
+    \?)                       # Invalid option
         printf "Error: invalid option.\n\n"
         exit
         ;;
@@ -41,9 +41,7 @@ EOF
 }
 
 start_jupyter() {
-    exec env SHELL="$PIXI_ENV/bin/bash" \
-        pixi run --manifest-path "$PIXI_PROJECT/pixi.toml" \
-        jupyter-lab \
+    exec $PIXI_ENV/bin/jupyter-lab \
         --allow-root \
         --no-browser \
         --port="$PORT_USER" \
@@ -84,8 +82,7 @@ elif [ "${COURSE}" == "Cirrocumulus" ]; then
 
     cd "${CIRRO_FOLDER}" || exit
     
-    exec env SHELL="$PIXI_ENV/bin/bash" pixi run --manifest-path "$PIXI_PROJECT/pixi.toml" \
-        cirro launch --host 0.0.0.0 --port $PORT_USER ./*.h5ad
+    exec $PIXI_ENV/bin/cirro launch --host 0.0.0.0 --port $PORT_USER ./*.h5ad
 
 # Intro to bulk RNAseq with Rstudio
 elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
@@ -115,8 +112,7 @@ elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
 
     fi
 
-    configure_rstudio
-    exec sudo /init
+    start_jupyter
 
 # Intro to spatial transcriptomics with scVerse
 elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
@@ -141,9 +137,7 @@ elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
     
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    pixi run \
-    --manifest-path $PIXI_PROJECT/pixi.toml \
-    Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
+    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
 
     start_jupyter
 
@@ -178,8 +172,7 @@ elif [ "${COURSE}" == "Intro_scRNAseq_R" ]; then
     printf "\n== Start RStudio ==  \n"
     printf "=================== \n\n"
 
-    configure_rstudio
-    exec sudo /init
+    start_jupyter
 
 #RNAsequencing development on jupyterlab
 elif [ "${COURSE}" == "RNAseq_CLI" ]; then
@@ -192,9 +185,7 @@ elif [ "${COURSE}" == "RNAseq_CLI" ]; then
 
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    pixi run \
-    --manifest-path $PIXI_PROJECT/pixi.toml \
-    Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
+    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R analysis")'
     start_jupyter
 
 
@@ -213,9 +204,7 @@ elif [ "${COURSE}" == "Advanced_SingleCell" ]; then
 
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    pixi run \
-    --manifest-path $PIXI_PROJECT/pixi.toml \
-    Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R Adv. Single Cell")'
+    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(sys_prefix = TRUE, name = "r_scrna", displayname = "R Adv. Single Cell")'
     start_jupyter
 
 fi
