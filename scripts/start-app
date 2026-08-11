@@ -176,7 +176,7 @@ elif [ "${COURSE}" == "Intro_scRNAseq_R" ]; then
 
     start_jupyter
 
-#RNAsequencing development on jupyterlab
+# RNAsequencing development on jupyterlab
 elif [ "${COURSE}" == "RNAseq_CLI" ]; then
     echo "-----> Chosen environment: Jupyterlab for CLI,"
     echo "python and R RNAseq analysis"
@@ -191,7 +191,7 @@ elif [ "${COURSE}" == "RNAseq_CLI" ]; then
     start_jupyter
 
 
-#Advanced single cell transcriptomics
+# Advanced single cell transcriptomics
 elif [ "${COURSE}" == "Advanced_SingleCell" ]; then
     echo "-----> Chosen environment: Advanced single cell analysis"
 
