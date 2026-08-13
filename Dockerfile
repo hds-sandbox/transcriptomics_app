@@ -106,7 +106,7 @@ export R_LIBS_USER=$R_HOME/library
 export LD_LIBRARY_PATH="$PIXI_ENV/lib:$LD_LIBRARY_PATH"
 EOF
 
-RUN $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r", displayname = "R")' 
+RUN $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r", displayname = "R")' && rm -rf $PIXI_ENV/share/jupyter/kernels/ir
 
 ## Set startup script in the PATH
 ## entrypoint script
