@@ -13,8 +13,10 @@ LABEL software="Transcriptomics sandbox" \
 ENV G_SLICE=always-malloc
 ENV PIXI_PROJECT=/opt/
 ENV PIXI_ENV=${PIXI_PROJECT}/.pixi/envs/course-env
+ENV R_HOME=$PIXI_ENV/lib/R
+ENV R_LIBS_USER=$R_HOME/library
 ENV SHELL=/bin/bash
-ENV PATH=$PATH:/home/$USER/bin:/home/$USER/.pixi/bin
+ENV PATH=$PIXI_ENV/bin:/home/$USER/bin:$PATH
 ENV RESOURCE_SCHEMA="${PIXI_ENV}/share/jupyter/labextensions/@jupyter-server/resource-usage/schemas/@jupyter-server/resource-usage/topbar-item.json"
 ENV JUPYTER_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/common-files_development/refs/heads/main/jupyterlab_and_plugins.yaml"
 
@@ -76,19 +78,22 @@ USER $USERID
 WORKDIR ${PIXI_PROJECT}
 
 RUN curl -fsSL https://pixi.sh/install.sh | bash \
+ && export PATH="$HOME/.pixi/bin:$PATH" \
  && mkdir -p "${PIXI_PROJECT}" \
  && curl -fsSL -o /opt/jupyterlab_and_plugins.yml "${JUPYTER_ENV_FILE}" \
- && pixi init \
- && pixi add conda-merge \
- && pixi run conda-merge ./environment.yml ./jupyterlab_and_plugins.yml > ./environment_merged.yml \
- && pixi import --environment course-env --format conda-env ./environment_merged.yml \
+ && "$HOME/.pixi/bin/pixi" init \
+ && "$HOME/.pixi/bin/pixi" add conda-merge \
+ && "$HOME/.pixi/bin/pixi" run conda-merge ./environment.yml ./jupyterlab_and_plugins.yml > ./environment_merged.yml \
+ && "$HOME/.pixi/bin/pixi" import --environment course-env --format conda-env ./environment_merged.yml \
  && rm -rf ./pixi/envs/default \
  && cat ./environment_merged.yml
 
 RUN --mount=type=secret,id=github_pat,env=GITHUB_PAT \
- pixi install --environment course-env --run-post-link-scripts \
- && pixi run --environment course-env \
+ "$HOME/.pixi/bin/pixi" install --environment course-env --run-post-link-scripts \
+ && "$HOME/.pixi/bin/pixi" run --environment course-env \
     Rscript /tmp/external_packages_for_pixi.R \
+ && jq --arg rpath "$PIXI_ENV/bin/R" '.argv[0] = $rpath' "$PIXI_ENV/share/jupyter/kernels/ir/kernel.json" > /tmp/ir-kernel.json \
+ && mv /tmp/ir-kernel.json "$PIXI_ENV/share/jupyter/kernels/ir/kernel.json" \
  && if [ -f "$RESOURCE_SCHEMA" ]; then \
       sed -i 's/"default": false/"default": true/g' "$RESOURCE_SCHEMA"; \
     fi \
@@ -96,7 +101,12 @@ RUN --mount=type=secret,id=github_pat,env=GITHUB_PAT \
 export PIXI_PROJECT=${PIXI_PROJECT}
 export PIXI_ENV=${PIXI_ENV}
 export PATH="$PIXI_ENV/bin:$HOME/.pixi/bin:$PATH"
+export R_HOME=$PIXI_ENV/lib/R
+export R_LIBS_USER=$R_HOME/library
+export LD_LIBRARY_PATH="$PIXI_ENV/lib:$LD_LIBRARY_PATH"
 EOF
+
+RUN $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r", displayname = "R")' 
 
 ## Set startup script in the PATH
 ## entrypoint script

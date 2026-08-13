@@ -4,7 +4,6 @@ CIRRO_FOLDER=/usr/Cirrocumulus/Data/pbmc3k
 PORT_USER=8787
 CURR_DIR=/work
 JUPYTER_KERNELS=$PIXI_ENV/share/jupyter/kernels/
-export PATH="$PIXI_ENV/bin:$HOME/.pixi/bin:$PATH"
 
 ## Options for the Transcriptomics Sandbox app
 while getopts c:f:p: option; do
@@ -56,6 +55,21 @@ start_jupyter() {
         --ServerApp.terminado_settings shell_command=/bin/bash \
         --ServerApp.root_dir="$CURR_DIR"
 }
+
+# Setup resource usage in topbar for jupyterlab
+sed -i 's/"default": false/"default": true/g' "$PIXI_ENV/share/jupyter/labextensions/@jupyter-server/resource-usage/schemas/@jupyter-server/resource-usage/topbar-item.json"
+
+#Initialize Pixi
+cd $CURR_DIR || exit
+
+#Course kernels setup for executables
+echo "-----> Mapping course kernels on JupyterLab"
+# shellcheck disable=SC2016,SC2044
+for KERNEL in $(find $JUPYTER_KERNELS -name kernel.json)
+do
+    echo "----------> Mapping $KERNEL"
+    jq --arg path "$PIXI_ENV/bin:$PIXI_ENV/libexec:$PATH" '.env = (.env // {}) + {PATH: $path}' "$KERNEL" > tmp.$$.json && mv tmp.$$.json "$KERNEL"
+done
 
 printf "\n======================  "
 printf "\n== Selecting Module == \n"
@@ -139,7 +153,7 @@ elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
     
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
+    #$PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
 
     start_jupyter
 
@@ -169,9 +183,9 @@ elif [ "${COURSE}" == "Intro_scRNAseq_R" ]; then
 
     fi
     
-    #start a session of rstudio server
+    #start a session of jupyterlab
     printf "\n===================  "
-    printf "\n== Start RStudio ==  \n"
+    printf "\n== Start JupyterLab ==  \n"
     printf "=================== \n\n"
 
     start_jupyter
@@ -187,7 +201,7 @@ elif [ "${COURSE}" == "RNAseq_CLI" ]; then
 
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
+    #$PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
     start_jupyter
 
 
@@ -206,7 +220,7 @@ elif [ "${COURSE}" == "Advanced_SingleCell" ]; then
 
     cd "$CURR_DIR" || exit
     #start a session of jupyterlab
-    $PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R Adv. Single Cell")'
+    #$PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R Adv. Single Cell")'
     start_jupyter
 
 fi
