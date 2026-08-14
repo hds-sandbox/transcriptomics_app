@@ -19,6 +19,7 @@ ENV SHELL=/bin/bash
 ENV PATH=$PIXI_ENV/bin:/home/$USER/bin:$PATH
 ENV RESOURCE_SCHEMA="${PIXI_ENV}/share/jupyter/labextensions/@jupyter-server/resource-usage/schemas/@jupyter-server/resource-usage/topbar-item.json"
 ENV JUPYTER_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/common-files_development/refs/heads/main/jupyterlab_and_plugins.yaml"
+ENV SPATIAL_SCVERSE_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/intro-spatial-scverse_workshop/refs/heads/hds-sandbox-main/environment.yaml"
 
 ## Copy input files
 COPY --chown=$USERID:$GROUPID envs/environment.yml ${PIXI_PROJECT}/environment.yml
@@ -81,9 +82,13 @@ RUN curl -fsSL https://pixi.sh/install.sh | bash \
  && export PATH="$HOME/.pixi/bin:$PATH" \
  && mkdir -p "${PIXI_PROJECT}" \
  && curl -fsSL -o /opt/jupyterlab_and_plugins.yml "${JUPYTER_ENV_FILE}" \
+ && curl -fsSL -o /opt/spatial_scverse.yml "${SPATIAL_SCVERSE_ENV_FILE}" \
+ # spatial-image is already pulled in as a transitive conda dependency of the spatialdata
+ # conda package below; drop the workshop's exact pip pin so the two don't conflict.
+ && sed -i 's/- spatial-image==1.1.0/- spatial-image/' /opt/spatial_scverse.yml \
  && "$HOME/.pixi/bin/pixi" init \
  && "$HOME/.pixi/bin/pixi" add conda-merge \
- && "$HOME/.pixi/bin/pixi" run conda-merge ./environment.yml ./jupyterlab_and_plugins.yml > ./environment_merged.yml \
+ && "$HOME/.pixi/bin/pixi" run conda-merge ./environment.yml ./jupyterlab_and_plugins.yml ./spatial_scverse.yml > ./environment_merged.yml \
  && "$HOME/.pixi/bin/pixi" import --environment course-env --format conda-env ./environment_merged.yml \
  && rm -rf ./pixi/envs/default \
  && cat ./environment_merged.yml

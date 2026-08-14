@@ -146,6 +146,14 @@ elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
         mv /tmp/course/download.py /tmp/course/test_notebooks.sh .
         rm -rf /tmp/course
 
+        # download the raw data
+        $PIXI_ENV/bin/python download.py --data_dir data raw visium
+        $PIXI_ENV/bin/python download.py --data_dir data raw visium_hd
+        $PIXI_ENV/bin/python download.py --data_dir data raw xenium
+
+        # download some already processed data
+        $PIXI_ENV/bin/python download.py --data_dir data zarr merfish
+
     else
         echo "-----> Using your own course material."
 
@@ -187,7 +195,7 @@ elif [ "${COURSE}" == "Intro_scRNAseq_R" ]; then
     printf "\n===================  "
     printf "\n== Start JupyterLab ==  \n"
     printf "=================== \n\n"
-
+    cd "$CURR_DIR" || exit
     start_jupyter
 
 # RNAsequencing development on jupyterlab
