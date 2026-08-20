@@ -21,8 +21,7 @@ ENV RESOURCE_SCHEMA="${PIXI_ENV}/share/jupyter/labextensions/@jupyter-server/res
 ENV JUPYTER_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/common-files_development/refs/heads/main/jupyterlab_and_plugins.yaml"
 ENV SPATIAL_SCVERSE_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/intro-spatial-scverse_workshop/refs/heads/hds-sandbox-main/environment.yaml"
 
-## Copy input files
-COPY --chown=$USERID:$GROUPID envs/environment.yml ${PIXI_PROJECT}/environment.yml
+
 COPY --chown=$USERID:$GROUPID scripts /tmp
 ## cirrocumulus example data
 COPY --chown=$USERID:$GROUPID ./pbmc3k /usr/Cirrocumulus/Data/pbmc3k
@@ -77,12 +76,13 @@ USER $USERID
 
 # Install Pixi and create the course environment
 WORKDIR ${PIXI_PROJECT}
+COPY --chown=$USERID:$GROUPID envs/environment.yml ${PIXI_PROJECT}/environment.yml
 
 RUN curl -fsSL https://pixi.sh/install.sh | bash \
  && export PATH="$HOME/.pixi/bin:$PATH" \
  && mkdir -p "${PIXI_PROJECT}" \
- && curl -fsSL -o /opt/jupyterlab_and_plugins.yml "${JUPYTER_ENV_FILE}" \
- && curl -fsSL -o /opt/spatial_scverse.yml "${SPATIAL_SCVERSE_ENV_FILE}" \
+ && curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 2 -o /opt/jupyterlab_and_plugins.yml "${JUPYTER_ENV_FILE}" \
+ && curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 2 -o /opt/spatial_scverse.yml "${SPATIAL_SCVERSE_ENV_FILE}" \
  # spatial-image is already pulled in as a transitive conda dependency of the spatialdata
  # conda package below; drop the workshop's exact pip pin so the two don't conflict.
  && sed -i 's/- spatial-image==1.1.0/- spatial-image/' /opt/spatial_scverse.yml \

@@ -26,9 +26,9 @@ if (nzchar(token) && token != "None") {
     message("GITHUB_PAT is not set; continuing without authentication.") 
 }
 
-#remotes::install_github(c("satijalab/seurat-data","mojaveazure/seurat-disk"),
-#                    upgrade="never",
-#                    quiet=TRUE)
+remotes::install_github(c("satijalab/seurat-data","satijalab/seurat-wrappers","mojaveazure/seurat-disk"),
+                    upgrade="never",
+                    quiet=TRUE)
 
 remotes::install_github("NightingaleHealth/ggforestplot",
     upgrade="never", 
