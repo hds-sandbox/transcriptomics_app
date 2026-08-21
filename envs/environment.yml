@@ -8,3 +8,4 @@ dependencies:
     - pip:
         - zenodo-get @ git+https://github.com/hds-sandbox/zenodo_get.git@patch-1
         - cirrocumulus
+        - celldega
