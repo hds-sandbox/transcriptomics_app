@@ -1,0 +1,5 @@
+https://raw.githubusercontent.com/hds-sandbox/intro-spatial-scverse_workshop/main/environment.yaml
+https://raw.githubusercontent.com/hds-sandbox/AdvancedSingleCell/main/Environment/environment.yml
+https://raw.githubusercontent.com/hds-sandbox/bulk_RNAseq_course/main/environment.yml
+https://raw.githubusercontent.com/hds-sandbox/scRNASeq_course/main/Environments/environment.yaml
+https://raw.githubusercontent.com/hds-sandbox/transcriptomics_app/main/envs/environment.yml

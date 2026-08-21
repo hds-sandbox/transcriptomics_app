@@ -42,20 +42,15 @@ install.packages('GOplot',
     repos='https://cloud.r-project.org', 
     quiet=TRUE )
 
+install.packages('languageserver', 
+    repos='https://cloud.r-project.org', 
+    quiet=TRUE )
+
 remotes::install_github("SamueleSoraggi/DoubletFinder", 
     upgrade="never",
     quiet=TRUE )
 
+
 remotes::install_github("smorabit/hdWGCNA", 
     upgrade="never",
     quiet=TRUE )
-
-#remotes::install_local('/tmp/hdWGCNA-69110d0.zip',
-#                        upgrade="never",
-#                        quiet=TRUE)
-
-#remotes::install_github('smorabit/hdWGCNA@69110d0aefdb0601a1215b232a83b29017a39dae', 
-#    ref='dev', 
-#    upgrade="never", 
-#    lib="/opt/miniconda/envs/RNAseq_env/lib/R/library/",
-#    quiet=FALSE)

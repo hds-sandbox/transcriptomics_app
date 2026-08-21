@@ -19,10 +19,10 @@ ENV SHELL=/bin/bash
 ENV PATH=$PIXI_ENV/bin:/home/$USER/bin:$PATH
 ENV RESOURCE_SCHEMA="${PIXI_ENV}/share/jupyter/labextensions/@jupyter-server/resource-usage/schemas/@jupyter-server/resource-usage/topbar-item.json"
 ENV JUPYTER_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/common-files_development/refs/heads/main/jupyterlab_and_plugins.yaml"
-ENV SPATIAL_SCVERSE_ENV_FILE="https://raw.githubusercontent.com/hds-sandbox/intro-spatial-scverse_workshop/refs/heads/hds-sandbox-main/environment.yaml"
 
 
 COPY --chown=$USERID:$GROUPID scripts /tmp
+COPY --chown=$USERID:$GROUPID envs/repolist.txt ${PIXI_PROJECT}/repolist.txt
 ## cirrocumulus example data
 COPY --chown=$USERID:$GROUPID ./pbmc3k /usr/Cirrocumulus/Data/pbmc3k
 
@@ -82,13 +82,10 @@ RUN curl -fsSL https://pixi.sh/install.sh | bash \
  && export PATH="$HOME/.pixi/bin:$PATH" \
  && mkdir -p "${PIXI_PROJECT}" \
  && curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 2 -o /opt/jupyterlab_and_plugins.yml "${JUPYTER_ENV_FILE}" \
- && curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 2 -o /opt/spatial_scverse.yml "${SPATIAL_SCVERSE_ENV_FILE}" \
- # spatial-image is already pulled in as a transitive conda dependency of the spatialdata
- # conda package below; drop the workshop's exact pip pin so the two don't conflict.
- && sed -i 's/- spatial-image==1.1.0/- spatial-image/' /opt/spatial_scverse.yml \
  && "$HOME/.pixi/bin/pixi" init \
  && "$HOME/.pixi/bin/pixi" add conda-merge \
- && "$HOME/.pixi/bin/pixi" run conda-merge ./environment.yml ./jupyterlab_and_plugins.yml ./spatial_scverse.yml > ./environment_merged.yml \
+ && bash /tmp/merge-repolist-envs.sh ./repolist.txt ./repolist_merged.yml \
+ && "$HOME/.pixi/bin/pixi" run conda-merge ./jupyterlab_and_plugins.yml ./repolist_merged.yml > ./environment_merged.yml \
  && "$HOME/.pixi/bin/pixi" import --environment course-env --format conda-env ./environment_merged.yml \
  && rm -rf ./pixi/envs/default \
  && cat ./environment_merged.yml
