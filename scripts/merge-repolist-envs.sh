@@ -22,14 +22,15 @@ fi
 
 downloaded_envs=()
 
-for env_source in "${env_sources[@]}"; do
+for i in "${!env_sources[@]}"; do
+    env_source="${env_sources[$i]}"
     env_name="$(basename "${env_source%%\?*}")"
 
     if [[ "$env_name" != *.yml && "$env_name" != *.yaml ]]; then
         env_name="${env_name}.yml"
     fi
 
-    target_file="$tmp_dir/$env_name"
+    target_file="$tmp_dir/${i}_${env_name}"
 
     if [[ "$env_source" == http://* || "$env_source" == https://* ]]; then
         curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 2 -o "$target_file" "$env_source"
