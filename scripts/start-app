@@ -86,19 +86,6 @@ if [ "${COURSE}" == "RNAseq_in_Rstudio" ]; then
     configure_rstudio
     exec sudo /init
 
-# Cirrocumulus scRNA visualizer
-elif [ "${COURSE}" == "Cirrocumulus" ]; then
-    echo "-----> Chosen module: Cirrocumulus - Single cell data explorer"
-    echo "-----> Cirrocumulus data folder ${CIRRO_FOLDER}"
-
-    printf "\n========================  "
-    printf "\n== Start Cirrocumulus ==  \n"
-    printf "======================== \n\n"
-
-    cd "${CIRRO_FOLDER}" || exit
-    
-    exec $PIXI_ENV/bin/cirro launch --host 0.0.0.0 --port $PORT_USER ./*.h5ad
-
 # Intro to bulk RNAseq with Rstudio
 elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
     echo "-----> Chosen course: Introduction to bulk RNAseq analysis in R"

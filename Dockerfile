@@ -58,12 +58,10 @@ RUN apt-get update \
  && mkdir -p \
     /opt/pixi \
     "/home/${USER}/.R" \
-    /usr/Cirrocumulus/Data \
  && chown -R "${USERID}:${GROUPID}" \
     /opt \
     /opt/pixi \
-    "/home/${USER}/.R" \
-    /usr/Cirrocumulus
+    "/home/${USER}/.R" 
 
 WORKDIR /sbin
 
