@@ -118,39 +118,39 @@ elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
     exec sudo /init
 
 # Intro to spatial transcriptomics with scVerse
-elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
-    echo "-----> Chosen course: introduction to spatial transcriptomics"
+#elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
+#    echo "-----> Chosen course: introduction to spatial transcriptomics"
+#
+#    if [ ! -d "Notebooks" ]; then
+#
+#       echo "-----> Downloading fresh course material."
+#        #Clone the repo and move the notebooks, then remove
+#        git clone -b hds-sandbox-main --depth 1 https://github.com/hds-sandbox/intro-spatial-scverse_workshop.git /tmp/course
+#        cd $CURR_DIR || exit
+#        mv /tmp/course/notebooks  ./notebooks
+#        mv /tmp/course/resources resources/
+#        mv /tmp/course/sandbox sandbox/
+#        mv /tmp/course/download.py /tmp/course/test_notebooks.sh .
+#        rm -rf /tmp/course
 
-    if [ ! -d "Notebooks" ]; then
-
-        echo "-----> Downloading fresh course material."
-        #Clone the repo and move the notebooks, then remove
-        git clone -b hds-sandbox-main --depth 1 https://github.com/hds-sandbox/intro-spatial-scverse_workshop.git /tmp/course
-        cd $CURR_DIR || exit
-        mv /tmp/course/notebooks  ./notebooks
-        mv /tmp/course/resources resources/
-        mv /tmp/course/sandbox sandbox/
-        mv /tmp/course/download.py /tmp/course/test_notebooks.sh .
-        rm -rf /tmp/course
-
-        # download the raw data
-        $PIXI_ENV/bin/python download.py --data_dir data raw visium
-        $PIXI_ENV/bin/python download.py --data_dir data raw visium_hd
-        $PIXI_ENV/bin/python download.py --data_dir data raw xenium
+#        # download the raw data
+#        $PIXI_ENV/bin/python download.py --data_dir data raw visium
+#        $PIXI_ENV/bin/python download.py --data_dir data raw visium_hd
+#        $PIXI_ENV/bin/python download.py --data_dir data raw xenium
 
         # download some already processed data
-        $PIXI_ENV/bin/python download.py --data_dir data zarr merfish
+#        $PIXI_ENV/bin/python download.py --data_dir data zarr merfish
 
-    else
-        echo "-----> Using your own course material."
+#    else
+#        echo "-----> Using your own course material."
 
-    fi
+#    fi
     
-    cd "$CURR_DIR" || exit
-    #start a session of jupyterlab
-    #$PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
+#    cd "$CURR_DIR" || exit
+#    #start a session of jupyterlab
+#    #$PIXI_ENV/bin/Rscript -e 'IRkernel::installspec(prefix=Sys.getenv("PIXI_ENV"), name = "r_scrna", displayname = "R analysis")'
 
-    start_jupyter
+#    start_jupyter
 
 
 # Intro to scRNAseq with Rstudio
