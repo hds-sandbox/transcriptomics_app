@@ -100,19 +100,22 @@ elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
         mkdir -p Scripts
         mv /tmp/course/Scripts/ucloud_preprocessing_setup Scripts/
         rm -rf /tmp/course
+    else
+        echo "-----> Using your own course material."
+    fi
+
+    if [ ! -d "Data" ]; then
         #Download only data and unzip
         "$PIXI_ENV/bin/zenodo_get" 10.5281/zenodo.7116370 -w /tmp/zenodo_urls.txt
         wget -O Data.zip "$(grep '/Data.zip' /tmp/zenodo_urls.txt)"
         unzip Data.zip
         rm -f Data.zip /tmp/zenodo_urls.txt
-
-        #make the results folder
-        mkdir -p Results
-
     else
-        echo "-----> Using your own course material."
-
+        echo "-----> Using your own data."
     fi
+
+    #make the results folder
+    mkdir -p Results
 
     configure_rstudio
     exec sudo /init
@@ -121,7 +124,7 @@ elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
 #elif [ "${COURSE}" == "Intro_spatial_scverse" ]; then
 #    echo "-----> Chosen course: introduction to spatial transcriptomics"
 #
-#    if [ ! -d "Notebooks" ]; then
+#    if [ ! -d "notebooks" ]; then
 #
 #       echo "-----> Downloading fresh course material."
 #        #Clone the repo and move the notebooks, then remove
@@ -132,7 +135,9 @@ elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
 #        mv /tmp/course/sandbox sandbox/
 #        mv /tmp/course/download.py /tmp/course/test_notebooks.sh .
 #        rm -rf /tmp/course
+#    fi
 
+#    if [ ! -d "data" ]; then
 #        # download the raw data
 #        $PIXI_ENV/bin/python download.py --data_dir data raw visium
 #        $PIXI_ENV/bin/python download.py --data_dir data raw visium_hd
@@ -140,10 +145,6 @@ elif [ "${COURSE}" == "Intro_to_bulkRNAseq" ]; then
 
         # download some already processed data
 #        $PIXI_ENV/bin/python download.py --data_dir data zarr merfish
-
-#    else
-#        echo "-----> Using your own course material."
-
 #    fi
     
 #    cd "$CURR_DIR" || exit
@@ -165,18 +166,22 @@ elif [ "${COURSE}" == "Intro_scRNAseq_R" ]; then
         cd $CURR_DIR || exit
         mv /tmp/course/Notebooks .
         rm -rf /tmp/course
+    else
+        echo "-----> Using your own course material."
+    fi
+
+    if [ ! -d "Data" ]; then
         #Download only data and unzip
-        "$PIXI_ENV/bin/zenodo_get" 10.5281/zenodo.7116370 -w /tmp/zenodo_urls.txt
+        "$PIXI_ENV/bin/zenodo_get" 10.5281/zenodo.7827898 -t 60 -w /tmp/zenodo_urls.txt
         wget -O Data.zip "$(grep '/Data.zip' /tmp/zenodo_urls.txt)"
         unzip Data.zip
         rm Data.zip /tmp/zenodo_urls.txt
-        #make the results folder
-        mkdir -p Results
-
     else
-        echo "-----> Using your own course material."
-
+        echo "-----> Using your own data."
     fi
+
+    #make the results folder
+    mkdir -p Results
     
     #start a session of jupyterlab
     printf "\n===================  "

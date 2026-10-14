@@ -16,11 +16,11 @@ The available modules are:
 | **Cirrocumulus**  | <div style="text-align: justify"> Cirrocumulus is an interactive visualization tool for large-scale single-cell genomics data. </div> | [Webpage](https://cirrocumulus.readthedocs.io/en/latest/) | - |
 | **RNAseq_CLI**  | <div style="text-align: justify"> Jupyter lab session containing common transcriptomics tools (for single-cell RNA and bulk-RNA data analysis), ideal to create your own pipelines (snakemake, nextflow, or gwf). It includes all packages from the RStudio session as well. | - |  Snakemake, R, python (in JupyterLab) |
 | **Introduction to bulk RNAseq analysis** |<div style="text-align: justify"> A 3-day course to introduce bulk RNAseq analysis, from data alignment to bioinformatics analysis </div> | [Webpage](https://hds-sandbox.github.io/bulk_RNAseq_course/) | R, bash, Nextflow (in RStudio) |
-| **Introduction to single cell RNAseq analysis** |<div style="text-align: justify"> A 2-day course to introduce single cell RNAseq analysis in R </div> | [Webpage](https://hds-sandbox.github.io/scRNAseq_course/) | R (in RStudio) |
+| **Introduction to single cell RNAseq analysis** |<div style="text-align: justify"> A 2-day course to introduce single cell RNAseq analysis in R </div> | [Webpage](https://hds-sandbox.github.io/scRNASeq_course/) | R (in RStudio) |
 | **Advanced single cell analysis** |<div style="text-align: justify"> Research-based examples for advanced topics in single cell analysis </div> | [Webpage](https://hds-sandbox.github.io/AdvancedSingleCell/) | R, python, bash (in jupyterLab) |
 
 
-**Note**: Course materials will be automatically downloaded unless you have "Added a folder" called `Intro_to_bulkRNAseq`, `Intro_to_scRNAseq_R` or `AdvancedSingleCell`, respectively, in the submission step of the transcriptomics app ([see below](#additional-options)).
+**Note**: Course materials will be automatically downloaded unless the `Notebooks` and `Data` folders (for `Intro_to_bulkRNAseq` and `Intro_scRNAseq_R`) or the `AdvancedSingleCell` folder already exist in the working directory ([see below](#additional-options)).
 
 ## How to use the modules
 
@@ -37,7 +37,7 @@ Our modules are designed to be user-friendly and easy to use. Some are for self-
 
     ![](BulkRNA_OpenNotebooks.gif)
 
-- In **Introduction to single cell RNAseq analysis**, you can access all the notebooks of an introductory single cell RNA analysis course, similar to the bulk RNA course above. Here you work with RStudio. Slides and other materials are available [through the webpage](https://hds-sandbox.github.io/scRNAseq_course/)
+- In **Introduction to single cell RNAseq analysis**, you can access all the notebooks of an introductory single cell RNA analysis course, similar to the bulk RNA course above. Here you work with RStudio. Slides and other materials are available [through the webpage](https://hds-sandbox.github.io/scRNASeq_course/)
 
 - In **Advanced single cell analysis**, you can run various tutorials and examples of advanced single cell analysis. Here you work with JupyterLab and Jupyter Notebooks. Slides and other materials are available [on the webpage](https://hds-sandbox.github.io/AdvancedSingleCell/). See below how to access the notebooks through the browser folder.
 
